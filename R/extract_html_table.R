@@ -11,7 +11,7 @@
 #' library(COREmisc)
 #'
 #' le_html <- htmltools::HTML()
-#' out_table <- extract_html_tabl(le_html)
+#' out_table <- extract_html_table(le_html)
 #' head(out(table))
 #'
 #' @seealso Uses funcitons from `magrittr` [magrittr::`%>%`],
