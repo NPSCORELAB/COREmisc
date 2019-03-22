@@ -18,5 +18,6 @@ Imports:
 	rlang,
 	rvest,
 	tibble,
-	tidyr
-	
+	tidyr,
+	stats,
+	var

@@ -31,6 +31,9 @@
 #' @importFrom tibble as_tibble
 #' @importFrom tidyr fill gather spread unnest
 #' @importFrom xml2 read_html
+#' @importFrom htmltools HTML
+#' @importFrom stats
+#' @importFrom var
 #'
 #' @export
 #'
