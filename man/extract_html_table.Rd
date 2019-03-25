@@ -15,8 +15,8 @@ extract_html_table(.html, ...)
 \examples{
 library(COREmisc)
 
-le_html <- htmltools::HTML()
-out_table <- extract_html_table(le_html)
+html <- htmltools::HTML()
+out_table <- extract_html_table(html)
 head(out(table))
 
 }

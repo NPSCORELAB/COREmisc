@@ -10,8 +10,8 @@
 #' @examples
 #' library(COREmisc)
 #'
-#' le_html <- htmltools::HTML()
-#' out_table <- extract_html_table(le_html)
+#' html <- htmltools::HTML()
+#' out_table <- extract_html_table(html)
 #' head(out(table))
 #'
 #' @seealso Uses funcitons from `magrittr` [magrittr::`%>%`],
@@ -49,7 +49,8 @@ extract_html_table <- function(.html, ...) {
     set_names( c("var", "val") )
 
   tagged_groups_df <- combo_raw_tables %>%
-    mutate( group_id = if_else(var == "Id", row_number(), NA_integer_) ) %>%
+    #mutate( group_id = if_else(var == "Id", row_number(), NA_integer_) ) %>%
+    mutate( group_id = if_else(var == "Id", rank(ties.method = "first"), NA_integer_) ) %>%
     fill(group_id)
 
   tagged_groups_df %>%
