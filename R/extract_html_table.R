@@ -24,7 +24,7 @@
 #' `xml2` [xml2::read_html].
 #'
 #' @importFrom magrittr %>%
-#' @importFrom dplyr bind_rows distinct group_split if_else mutate mutate_if select starts_with
+#' @importFrom dplyr bind_rows distinct group_split if_else mutate mutate_if row_number select starts_with
 #' @importFrom purrr map map_dfr
 #' @importFrom rlang !!! set_names syms
 #' @importFrom rvest html_nodes html_table
