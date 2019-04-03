@@ -17,7 +17,7 @@ library(COREmisc)
 
 html <- htmltools::HTML()
 out_table <- extract_html_table(html)
-head(out(table))
+head(out_table)
 
 }
 \seealso{
