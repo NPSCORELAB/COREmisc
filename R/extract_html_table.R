@@ -34,8 +34,6 @@
 #' @importFrom htmltools HTML
 #'
 #' @export
-#'
-#### extract_table function ====
 extract_html_table <- function(.html, ...) {
 
   raw <- read_html(.html)
@@ -63,8 +61,6 @@ extract_html_table <- function(.html, ...) {
     distinct()
 }
 
-
-#### Structure Table as Edgelist ====
 #' @title Extract HTML Table
 #'
 #' @description `extract_edgelist` returns a `data.frame` edgelist from the returns from `extract_table`
@@ -89,8 +85,6 @@ extract_html_table <- function(.html, ...) {
 #' @importFrom rlang !!! set_names syms
 #'
 #' @export
-#'
-#'#### extract_edgelist function ====
 extract_edgelist <- function(.df, source, target, ...){
 
   if (!is.data.frame(.df)) {
