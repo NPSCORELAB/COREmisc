@@ -20,4 +20,6 @@ Imports:
 	tibble,
 	tidyr, 
 	shinydashboard, 
-	htmltools
+	htmltools,
+	DT,
+	data.table
