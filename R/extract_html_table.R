@@ -12,7 +12,7 @@
 #'
 #' html <- htmltools::HTML()
 #' out_table <- extract_html_table(html)
-#' head(out(table))
+#' head(out_table)
 #'
 #' @seealso Uses funcitons from `magrittr` [magrittr::`%>%`],
 #' `dplyr` [dplyr::bind_rows][dplyr::distinct][dplyr::group_split][dplyr::if_else][dplyr::mutate][dplyr::mutate_if][dplyr::select][dplyr::starts_with],
@@ -49,8 +49,8 @@ extract_html_table <- function(.html, ...) {
     set_names( c("var", "val") )
 
   tagged_groups_df <- combo_raw_tables %>%
-    #mutate( group_id = if_else(var == "Id", row_number(), NA_integer_) ) %>%
-    mutate( group_id = if_else(var == "Id", rank(ties.method = "first"), NA_integer_) ) %>%
+    mutate( group_id = if_else(var == "Id", row_number(), NA_integer_) ) %>%
+    #mutate( group_id = if_else(var == "Id", rank(ties.method = "first"), NA_integer_) ) %>%
     fill(group_id)
 
   tagged_groups_df %>%
@@ -65,17 +65,33 @@ extract_html_table <- function(.html, ...) {
 
 
 #### Structure Table as Edgelist ====
+#' @title Extract HTML Table
+#'
+#' @description `extract_edgelist` returns a `data.frame` edgelist from the returns from `extract_table`
+#'
+#' @author Christopher Callaghan, \email{cjcallag@@nps.edu}
+#'
+#' @param .df, An `csv` file extracted from an `HTML` table.
+#'
+#' @examples
+#' library(COREmisc)
+#'
+#' dataframe <- read.csv(file.choose())
+#' edgelist <- extract_edgelist(dataframe, source = "Author", target = "sent_to_val")
+#' head(edgelist)
+#'
+#' @seealso Uses funcitons from `magrittr` [magrittr::`%>%`],
+#' `dplyr` [dplyr::rename][dplyr::select],
+#' `rlang` [rlang::`!!!`][rlang::set_names][rlang::syms],
+#'
+#' @importFrom magrittr %>%
+#' @importFrom dplyr rename select
+#' @importFrom rlang !!! set_names syms
+#'
+#' @export
+#'
+#'#### extract_edgelist function ====
 extract_edgelist <- function(.df, source, target, ...){
-  # roxygen info for later
-  #' @importFrom magrittr %>%
-  `%>%`       <- magrittr::`%>%`
-  #' @importFrom dplyr rename select
-  rename <- dplyr::rename
-  select <- dplyr::select
-  #' @importFrom rlang !!! set_names syms
-  `!!!`       <- rlang::`!!!`
-  set_names   <- rlang::set_names
-  syms        <- rlang::syms
 
   if (!is.data.frame(.df)) {
     print("The object provided is not a data.frame.")
@@ -106,4 +122,5 @@ extract_edgelist <- function(.df, source, target, ...){
   out <- .df %>%
     select(!!!out_cols) %>%
     set_names( c("source", "target") )
+  out
 }
