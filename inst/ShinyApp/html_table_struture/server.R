@@ -55,12 +55,10 @@ shinyServer(function(input, output, session) {
         lapply(., dplyr::mutate_if, is.numeric, as.character) %>%
         dplyr::bind_rows() %>%
         rlang::set_names( c("var", "val"))
-      print(combo_raw_tables)
       tagged_groups_df <- combo_raw_tables %>%
         dplyr::mutate( group_id = if_else(var == "Id", row_number(), NA_integer_) ) %>%
         #dplyr::mutate(group_id = dplyr::if_else(var == "id", dplyr::row_number(), NA_integer_) ) %>%
         tidyr::fill(group_id)
-      print(tagged_groups_df)
       tagged_groups_df %>%
         dplyr::group_split(group_id) %>%
         purrr::map(tidyr::spread, var, val) %>%
@@ -69,7 +67,6 @@ shinyServer(function(input, output, session) {
         tidyr::unnest(sent_to_val) %>%
         dplyr::mutate(sent_to_val = paste(sent_to_val, ")", sep="")) %>%
         dplyr::distinct() -> clean_table
-      print(clean_table)
       return(clean_table)
     }
     else{}
