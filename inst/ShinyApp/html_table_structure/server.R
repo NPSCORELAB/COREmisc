@@ -82,8 +82,8 @@ shinyServer(function(input, output, session) {
         # Set up data table:
         clean_html <- get_common_data()
         clean_html %>%
-          dplyr::select(Author, sent_to_val, Id, `Item-type`, Time, Text) %>%
-          dplyr::rename(from=Author, to=sent_to_val, msgId = Id, type=`Item-type`) -> el_common_out
+          dplyr::select(Author, sent_to_val, everything()) %>%
+          dplyr::rename(from=Author, to=sent_to_val) -> el_common_out
       }
       write.csv(el_common_out, file, row.names = FALSE)
     }
@@ -94,8 +94,8 @@ shinyServer(function(input, output, session) {
     if(input$format == "Facebook Returns"){
       clean_html <- get_common_data()
       clean_html %>%
-        dplyr::select(Author, sent_to_val, Id, `Item-type`, Time, Text) %>%
-        dplyr::rename(from=Author, to=sent_to_val, msgId = Id, type=`Item-type`) %>%
+        dplyr::select(Author, sent_to_val, everything()) %>%
+        dplyr::rename(from=Author, to=sent_to_val) %>%
         datatable(rownames=FALSE,
                   options=list(
                     scrollX = TRUE,
