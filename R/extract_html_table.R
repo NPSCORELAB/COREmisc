@@ -112,7 +112,7 @@ extract_edgelist <- function(.df, source, target, ...){
 
   out_cols <- syms(c(source, target))
 
-  out <- .df %>%
+  coout <- .df %>%
     select(!!!out_cols) %>%
     set_names( c("source", "target") )
   out

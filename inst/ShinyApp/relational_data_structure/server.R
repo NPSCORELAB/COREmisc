@@ -10,6 +10,11 @@ shinyServer(function(input, output, session) {
         fileInput("in_common", "Choose a file:", accept = c(".html"))
       )
     }
+    if(input$format == "IP Dataframe"){
+      fluidRow(
+        fileInput("in_common", "Choose a file:", accept = c(".csv"))
+      )
+    }
   })
   # Reactive download UI:
   output$choice_download_ui <- renderUI({
@@ -69,6 +74,14 @@ shinyServer(function(input, output, session) {
         dplyr::distinct() -> clean_table
       return(clean_table)
     }
+    if(input$format == "IP Dataframe"){
+      getdf <- reactive({
+        indf_temp <- input$in_common
+        indf <- read.csv(indf_temp$datapath, header=TRUE)
+      })
+      out <- COREmisc::find_ip(getdf())
+      return(out)
+    }
     else{}
   })
 
@@ -84,6 +97,13 @@ shinyServer(function(input, output, session) {
         clean_html %>%
           dplyr::select(Author, sent_to_val, everything()) %>%
           dplyr::rename(from=Author, to=sent_to_val) -> el_common_out
+      }
+      if(input$format == "FIP Dataframe"){
+        # Set up data table:
+        clean_df <- get_common_data()
+        clean_df %>%
+          dplyr::select(everything()) %>%
+          rename(from="Sender_Number", to="Target_Number") -> el_common_out
       }
       write.csv(el_common_out, file, row.names = FALSE)
     }
@@ -108,6 +128,22 @@ shinyServer(function(input, output, session) {
                     bFilter=TRUE
                   )) -> out_html
       return(out_html)
+    }
+    if(input$format == "IP Dataframe"){
+      clean_df <- get_common_data()
+      clean_df %>%
+        datatable(rownames=FALSE,
+                  options=list(
+                    scrollX = TRUE,
+                    pageLength = 5,
+                    #autoWidth=TRUE,
+                    lengthChange = TRUE,
+                    searching = FALSE,
+                    bInfo=FALSE,
+                    bPaginate=TRUE,
+                    bFilter=TRUE
+                  )) -> out_df
+      return(out_df)
     }
   })
 })

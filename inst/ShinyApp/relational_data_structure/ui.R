@@ -6,7 +6,7 @@ library(visNetwork)
 library(igraph)
 
 header <- dashboardHeader(
-  title = "HTML Table Structurer"
+  title = "Relational Data Structurer"
 )
 
 sidebar <- dashboardSidebar(
@@ -29,7 +29,7 @@ body <- dashboardBody(
       fluidRow(
         box(width = 12,
             selectInput("format", "Data source:",
-                        choices=c("","Facebook Returns"),
+                        choices=c("","Facebook Returns", "IP Dataframe"),
                         selected = ""
             ),
             fluidRow(

@@ -1,5 +1,5 @@
 #' @export
-launch_html_shiny_app <- function(.app = "html_table_structure",
+launch_shiny_app <- function(.app = "relational_data_structure",
                              .use_browser = TRUE) {
   dir <- system.file("ShinyApp", .app, package = "COREmisc")
 
