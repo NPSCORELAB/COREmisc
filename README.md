@@ -24,8 +24,15 @@ edgelist <- COREmisc::extract_edgelist(table_out, "Author", "sent_to_val")
 head(edgelist)
 ```
 
+or
+
+``` r
+df <- read.csv(file.choose())
+geocoded_df <- COREmisc::find_ip(df)
+```
+
 ## Launching Apps Locally
 
 ``` r
-COREmisc::launch_html_shiny_app()
+COREmisc::launch_shiny_app()
 ```  
