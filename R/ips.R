@@ -20,6 +20,11 @@
 #'
 #' @export
 find_ip <- function(.df, ...) {
+  if (!requireNamespace("ipapi", quietly = TRUE)) {
+    stop("{ipapi} packages is required for this function.
+           Install it with `devtools::install_github('hrbrmstr/ipapi')`.", call. = FALSE)
+  }
+
   if("Sender_IP" %in% colnames(.df)){
     geolocated <- ipapi::geolocate(.df$Sender_IP, .progress = TRUE)
 
