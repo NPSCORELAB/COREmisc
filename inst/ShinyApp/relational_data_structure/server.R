@@ -5,16 +5,16 @@ library(rvest)
 shinyServer(function(input, output, session) {
   #### Common Format Explorer ####
   output$choice_ui <- renderUI({
-    if(input$format == "Facebook Returns"){
+    if(input$format == "Instagram Returns"){
       fluidRow(
         fileInput("in_common", "Choose a file:", accept = c(".html"))
       )
     }
-    if(input$format == "IP Dataframe"){
-      fluidRow(
-        fileInput("in_common", "Choose a file:", accept = c(".csv"))
-      )
-    }
+    # if(input$format == "IP Dataframe"){
+    #   fluidRow(
+    #     fileInput("in_common", "Choose a file:", accept = c(".csv"))
+    #   )
+    # }
   })
   # Reactive download UI:
   output$choice_download_ui <- renderUI({
@@ -47,7 +47,7 @@ shinyServer(function(input, output, session) {
 
   # Get data:
   get_common_data <- eventReactive(input$in_common, {
-    if(input$format == "Facebook Returns"){
+    if(input$format == "Instagram Returns"){
       gethtml <- reactive({
         in_html <- input$in_common
         out <- htmltools::HTML(in_html$datapath)
@@ -91,7 +91,7 @@ shinyServer(function(input, output, session) {
       paste(input$name_common, "_el.csv", sep="")
     },
     content = function(file){
-      if(input$format == "Facebook Returns"){
+      if(input$format == "Instagram Returns"){
         # Set up data table:
         clean_html <- get_common_data()
         clean_html %>%
@@ -111,7 +111,7 @@ shinyServer(function(input, output, session) {
 
   # Reactive table render:
   output$out_format <- renderDataTable({
-    if(input$format == "Facebook Returns"){
+    if(input$format == "Instagram Returns"){
       clean_html <- get_common_data()
       clean_html %>%
         dplyr::select(Author, sent_to_val, everything()) %>%

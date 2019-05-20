@@ -29,7 +29,10 @@ body <- dashboardBody(
       fluidRow(
         box(width = 12,
             selectInput("format", "Data source:",
-                        choices=c("","Facebook Returns", "IP Dataframe"),
+                        choices=c("","Instagram Returns"
+                                  #,
+                                  #"IP Dataframe"
+                                  ),
                         selected = ""
             ),
             fluidRow(
