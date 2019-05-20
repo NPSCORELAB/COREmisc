@@ -26,7 +26,7 @@ find_ip <- function(.df, ...) {
   }
 
   if("Sender_IP" %in% colnames(.df)){
-    geolocated <- ipapi::geolocate(.df$Sender_IP, .progress = TRUE)
+    geolocated <- geolocate(.df$Sender_IP, .progress = TRUE)
 
     .df %>%
       left_join(geolocated, by=c("Sender_IP"="query")) %>%
