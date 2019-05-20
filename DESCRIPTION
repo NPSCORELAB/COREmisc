@@ -28,7 +28,5 @@ Imports:
 	DT,
 	visNetwork,
 	xml2
-Suggests:
-    ipapi
 Remotes:
-  hrbrmstr/ipapi
+   github::hrbrmstr/ipapi
