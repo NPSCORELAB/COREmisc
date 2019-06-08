@@ -11,14 +11,13 @@ read_ora_xml <- function(.path_to_xml, ...) {
     jsonlite::fromJSON()
 
   # Get edge list
-  edges <- raw_list$DynamicMetaNetwork$MetaNetwork$networks$network$link$`_attributes`
-
+  edges <- raw_list$DynamicMetaNetwork$MetaNetwork$networks$network$link
   # Get network metadata
-  metadata <- raw_list$DynamicMetaNetwork$MetaNetwork$networks$network$`_attributes$metadata`
-
+  metadata <- raw_list$DynamicMetaNetwork$MetaNetwork$networks$network
   # Get node list
-  nodes <- raw_list$DynamicMetaNetwork$MetaNetwork$nodes$nodeclass$node$`_attributes`
+  nodes <- raw_list$DynamicMetaNetwork$MetaNetwork$nodes$nodeclass$node
 
   out <- list(metadata = metadata, edges = edges, nodes = nodes)
   out
 }
+
