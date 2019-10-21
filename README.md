@@ -5,8 +5,6 @@ COREmisc
 
 [![Travis build
 status](https://travis-ci.org/NPSCORELAB/COREmisc.svg?branch=master)](https://travis-ci.org/NPSCORELAB/COREmisc)
-[![Github All
-Releases](https://img.shields.io/github/downloads/NPSCORELAB/COREmisc/total.svg)]()
 <!-- badges: end -->
 
 ## Installation
