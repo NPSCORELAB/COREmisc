@@ -1,0 +1,56 @@
+---
+title: "COREmisc"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+<!-- badges: start -->
+[![Travis build status](https://travis-ci.org/NPSCORELAB/COREmisc.svg?branch=master)](https://travis-ci.org/NPSCORELAB/COREmisc)
+[![Github All Releases](https://img.shields.io/github/downloads/NPSCORELAB/COREmisc/total.svg)]()
+  <!-- badges: end -->
+
+
+## Installation
+
+  1. Install `devtools` if you haven't already.
+```{r, eval = FALSE}
+install.packages("devtools")
+```
+
+  2. Install the package using `devtools`.
+
+```{r, eval = FALSE}
+devtools::install_github("NPSCORELAB/COREmisc", force = TRUE)
+```
+
+## Using Functions Locally
+
+```{r, eval = FALSE}
+html      <- COREmisc:::get_html("PATH/TO/YOUR/DATA.html")
+table_out <- COREmisc::extract_shares(html)
+```
+
+```{r, echo = FALSE}
+dplyr::as_tibble(
+  COREmisc::extract_shares(COREmisc:::get_html("inst/extdata/direct_shares.html")
+                           )
+  )
+```
+
+
+## Launching Apps Locally
+
+**{COREmisc}** apps
+
+```{r, eval = FALSE}
+COREmisc::launch_shiny_app(.app         = "relational_data_structure",
+                           .use_browser = TRUE)
+```
+
+```{r, echo = FALSE}
+knitr::include_graphics(path = "inst/imgs/landing.png")
+```
+
