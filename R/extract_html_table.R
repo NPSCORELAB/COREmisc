@@ -1,44 +1,38 @@
-#' @title Extract HTML Table
+#' @keywords internal
 #'
-#' @description `extract_table` returns a `data.frame` with the values in the HTML.
+#' @title Get HTML
+#' @param file_path the location and name of the file which the data are to be read from.
+#' @param ... Extra arguments to pass.
+#'
+#' @importFrom htmltools HTML
+#' @importFrom xml2 read_html
+#'
+get_html <- function(file_path) {
+  #stopifnot(file.exists(file_path))
+  read_html( HTML( file_path ) )
+}
+
+#' @title Extract Direct Shares Table
+#'
+#' @description `extract_shares` returns a `data.frame` with the values in the HTML.
 #'
 #' @author Christopher Callaghan, \email{cjcallag@@nps.edu}
 #' @author Brendan Knapp, \email{brendan.knapp@@nps.edu}
 #'
-#' @param .html, An `HTML` file like the example
-#'
-#' @examples
-#' library(COREmisc)
-#'
-#' html <- htmltools::HTML()
-#' out_table <- extract_html_table(html)
-#' head(out_table)
-#'
-#' @seealso Uses funcitons from `magrittr` [magrittr::`%>%`],
-#' `dplyr` [dplyr::bind_rows][dplyr::distinct][dplyr::group_split][dplyr::if_else][dplyr::mutate][dplyr::mutate_if][dplyr::select][dplyr::starts_with],
-#' `purr` [purrr::map][purrr::map_dfr],
-#' `rlang` [rlang::`!!!`][rlang::set_names][rlang::syms],
-#' `rvest` [rvest::html_nodes][rvest::html_table],
-#' `tibble` [tibble::as_tibble],
-#' `tidyr` [tidyr::fill][tidyr::gather][tidyr::spread][tidyr::unnest],
-#' `xml2` [xml2::read_html].
+#' @param .html An `HTML` file from each information request.
+#' @param ... Extra arguments to pass.
 #'
 #' @importFrom magrittr %>%
-#' @importFrom dplyr bind_rows distinct group_split if_else mutate mutate_if row_number select starts_with
+#' @importFrom dplyr mutate_if bind_rows mutate if_else row_number group_split starts_with
 #' @importFrom purrr map map_dfr
-#' @importFrom rlang !!! set_names syms
+#' @importFrom rlang set_names
 #' @importFrom rvest html_nodes html_table
-#' @importFrom tibble as_tibble
 #' @importFrom tidyr fill gather spread unnest
-#' @importFrom xml2 read_html
-#' @importFrom htmltools HTML
+#' @importFrom lubridate ymd_hms with_tz
 #'
 #' @export
-extract_html_table <- function(.html, ...) {
-
-  raw <- read_html(.html)
-
-  combo_raw_tables <- raw %>%
+extract_shares <- function(.html, ...) {
+  combo_raw_tables <- .html %>%
     html_nodes("table") %>%
     html_nodes("table") %>%
     html_table(fill=TRUE) %>%
@@ -47,7 +41,9 @@ extract_html_table <- function(.html, ...) {
     set_names( c("var", "val") )
 
   tagged_groups_df <- combo_raw_tables %>%
-    mutate( group_id = if_else(var == "Id", row_number(), NA_integer_) ) %>%
+    mutate( group_id = if_else(var == "Id",
+                               row_number(),
+                               NA_integer_) ) %>%
     fill(group_id)
 
   tagged_groups_df %>%
@@ -56,61 +52,120 @@ extract_html_table <- function(.html, ...) {
     map_dfr( gather, "sent_to_key", "sent_to_val", starts_with("Recipients") ) %>%
     mutate(sent_to_val = strsplit(sent_to_val, ")")) %>%
     unnest(sent_to_val) %>%
-    mutate(sent_to_val = paste(sent_to_val, ")", sep="")) %>%
+    mutate(sent_to_val = paste(sent_to_val, ")", sep=""),
+           Time_tz = ymd_hms(Time) %>%
+             with_tz(tzone = Sys.timezone())) %>%
     distinct()
 }
 
-#' @title Extract HTML Table
+#' @title Extract Direct Stories Table
 #'
-#' @description `extract_edgelist` returns a `data.frame` edgelist from the returns from `extract_table`
+#' @description `extract_stories` returns a `data.frame` with the values in the HTML.
+#'
+#' @author Christopher Callaghan, \email{cjcallag@@nps.edu}
+#' @author Brendan Knapp, \email{brendan.knapp@@nps.edu}
+#'
+#' @param .html An `HTML` file from each information request.
+#' @param ... Extra arguments to pass.
+#'
+#' @importFrom magrittr %>%
+#' @importFrom dplyr bind_rows distinct group_split if_else mutate mutate_if row_number select starts_with
+#' @importFrom purrr map map_dfr
+#' @importFrom rlang set_names
+#' @importFrom rvest html_nodes html_table
+#' @importFrom tidyr fill gather spread unnest
+#' @importFrom lubridate ymd_hms with_tz
+#'
+#' @export
+extract_stories <- function(.html, ...) {
+  combo_raw_tables <- .html %>%
+    html_nodes("table") %>%
+    html_nodes("table") %>%
+    html_table(fill=TRUE) %>%
+    lapply(., mutate_if, is.numeric, as.character) %>%
+    bind_rows() %>%
+    set_names( c("var", "val") )
+
+  tagged_groups_df <- combo_raw_tables %>%
+    mutate( group_id = if_else(var == "Media Id",
+                               row_number(),
+                               NA_integer_) ) %>%
+    fill(group_id)
+
+  tagged_groups_df %>%
+    group_split(group_id) %>%
+    map(spread, var, val) %>%
+    map_dfr( gather, "sent_to_key", "sent_to_val", starts_with("Recipients") ) %>%
+    mutate(sent_to_val = strsplit(sent_to_val, ")")) %>%
+    unnest(sent_to_val) %>%
+    mutate(sent_to_val = paste(sent_to_val, ")", sep=""),
+           Time_tz = lubridate::ymd_hms(Time) %>%
+             lubridate::with_tz(tzone = Sys.timezone())) %>%
+    distinct()
+}
+
+#' @title Extract Followship Table
+#'
+#' @description `extract_followship` returns a `data.frame` with the values in the HTML.
+#'
+#' @author Christopher Callaghan, \email{cjcallag@@nps.edu}
+#' @author Brendan Knapp, \email{brendan.knapp@@nps.edu}
+#'
+#' @param .html An `HTML` file from each information request.
+#' @param ... Extra arguments to pass.
+#'
+#' @importFrom magrittr %>%
+#' @importFrom dplyr mutate_if bind_rows select
+#' @importFrom rlang set_names
+#' @importFrom rvest html_nodes html_table
+#' @importFrom stringr str_split
+#' @importFrom tidyr unnest
+#'
+#' @export
+extract_followship <- function(.html, ...) {
+  raw_followers <- .html %>%
+    html_nodes("table") %>%
+    html_table(fill=TRUE) %>%
+    lapply(., mutate_if, is.numeric, as.character) %>%
+    bind_rows() %>%
+    set_names( c("var", "val") ) %>%
+    select(val) %>%
+    mutate(followers = str_split(
+      val, "\r\n\r\n")) %>%
+    unnest() %>%
+    select(followers)
+
+  raw_followers
+}
+
+#' @title Extract Edgelist
+#'
+#' @description `extract_edgelist` returns a `data.frame` edgelist from other tables extracted from HTML returns.
 #'
 #' @author Christopher Callaghan, \email{cjcallag@@nps.edu}
 #'
-#' @param .df, An `csv` file extracted from an `HTML` table.
-#'
-#' @examples
-#' library(COREmisc)
-#'
-#' dataframe <- read.csv(file.choose())
-#' edgelist <- extract_edgelist(dataframe, source = "Author", target = "sent_to_val")
-#' head(edgelist)
-#'
-#' @seealso Uses funcitons from `magrittr` [magrittr::`%>%`],
-#' `dplyr` [dplyr::rename][dplyr::select],
-#' `rlang` [rlang::`!!!`][rlang::set_names][rlang::syms],
+#' @param .df a \code{data.frame} for parsing.
+#' @param .source variable name to select as source
+#' @param .target variable name to select as target
+#' @param ... Extra arguments to pass.
 #'
 #' @importFrom magrittr %>%
-#' @importFrom dplyr rename select
+#' @importFrom dplyr select
 #' @importFrom rlang !!! set_names syms
 #'
 #' @export
-extract_edgelist <- function(.df, source, target, ...){
-
+extract_edgelist <- function(.df, .source, .target, ...){
   if (!is.data.frame(.df)) {
-    print("The object provided is not a data.frame.")
+    stop("The object provided is not a data.frame.", call. = FALSE)
   }
-  if (nrow(.df) == 0L) {
-    print("Data frame at provided has 0 rows.")
+  if(!.source %in% colnames(.df)) {
+    stop("The selected source is not present in the data frame", call. = FALSE)
   }
-  if (ncol(.df) == 0L) {
-    print("Data frame at provided has 0 columns.")
-  }
-  if (missing(source)){
-    print("You have not specified the source column.")
-  }
-  if (missing(target)){
-    print("You have not specified the target column.")
-  }
-  if(!source %in% colnames(.df))
-  {
-    print("The selected source is not present in the data.frame")
-  }
-  if(!target %in% colnames(.df))
-  {
+  if(!.target %in% colnames(.df)) {
     print("The selected target is not present in the data.frame")
   }
 
-  out_cols <- syms(c(source, target))
+  out_cols <- syms(c(.source, .target))
 
   out <- .df %>%
     select(!!!out_cols) %>%

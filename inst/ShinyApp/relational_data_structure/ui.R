@@ -1,53 +1,49 @@
-library(shinydashboard)
-library(shiny)
-library(dplyr)
-library(DT)
-library(visNetwork)
-library(igraph)
-
-header <- dashboardHeader(
-  title = "Relational Data Structurer"
-)
-
-sidebar <- dashboardSidebar(
-  sidebarMenu(
-    id="tabs",
-    menuItem( "Common Format Explorer",
-              tabName = "formats",
-              icon = icon("wpexplorer")),
-    menuItem( "Support",
-              tabName = "support",
-              icon = icon("info-circle"))
-  )
-)
-
-body <- dashboardBody(
-  shinyjs::useShinyjs(),
-  tabItems(
-    tabItem(
-      tabName = "formats",
-      fluidRow(
-        box(width = 12,
-            selectInput("format", "Data source:",
-                        choices=c("","Instagram Returns"
-                                  #,
-                                  #"IP Dataframe"
-                                  ),
-                        selected = ""
-            ),
-            fluidRow(
-              column(12, align="left", column(12, uiOutput("choice_ui"))),
-              br(),
-              column(12, align="left", column(12, uiOutput("choice_download_ui")))
-            )
-        )
-      ),
-      mainPanel(dataTableOutput("out_format"), width = "100%")
-    )
-  ))
-
-dashboardPage(
-  header,
-  sidebar,
-  body
-)
+ui <- fluidPage(
+  # App title ----
+  titlePanel("Structuring SM Data"),
+  # Sidebar layout ----
+  sidebarLayout(
+    # Sidebar panel for inputs ----
+    sidebarPanel(
+      # First select the type of return to unpack:
+      selectInput(inputId = "return_type",
+                  label   = "Select type of return to unpack:",
+                  choices = c("",
+                              "Direct Shares",
+                              "Direct Stories",
+                              "Followship"),
+                  selected = ""
+                  ),
+      # Second ingest file to unpack:
+      fileInput(inputId     = "in_file",
+                label       = "Upload a file for unpacking:",
+                multiple    = FALSE,
+                accept      = c(".html"),
+                button      = "Browse...",
+                placeholder = "No file selected"),
+      # Third submit options:
+      column(width = 12,
+             align = "center",
+             actionButton(inputId = "go_button",
+                          icon    = icon("play-circle"),
+                          label   = "Go!")
+             ),
+      br()
+      # ,
+      # br(),
+      # column(width = 12,
+      #        align = "left",
+      #        column(
+      #          width = 12,
+      #          uiOutput("download_ui")
+      #        )
+      #        )
+    ), # End sidebarPanel()
+    # Main panel for displaying outputs ----
+    mainPanel(
+      tabsetPanel(type = "tabs",
+                  tabPanel("Table", dataTableOutput("table"))
+                  )
+    ) # End mainPanel()
+  ) # End sidebarLayout()
+) # End fluidPage()

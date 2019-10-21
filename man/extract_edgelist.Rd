@@ -2,28 +2,21 @@
 % Please edit documentation in R/extract_html_table.R
 \name{extract_edgelist}
 \alias{extract_edgelist}
-\title{Extract HTML Table}
+\title{Extract Edgelist}
 \usage{
-extract_edgelist(.df, source, target, ...)
+extract_edgelist(.df, .source, .target, ...)
 }
 \arguments{
-\item{.df, }{An `csv` file extracted from an `HTML` table.}
+\item{.df}{a \code{data.frame} for parsing.}
+
+\item{.source}{variable name to select as source}
+
+\item{.target}{variable name to select as target}
+
+\item{...}{Extra arguments to pass.}
 }
 \description{
-`extract_edgelist` returns a `data.frame` edgelist from the returns from `extract_table`
-}
-\examples{
-library(COREmisc)
-
-dataframe <- read.csv(file.choose())
-edgelist <- extract_edgelist(dataframe, source = "Author", target = "sent_to_val")
-head(edgelist)
-
-}
-\seealso{
-Uses funcitons from `magrittr` [magrittr::`%>%`],
-`dplyr` [dplyr::rename][dplyr::select],
-`rlang` [rlang::`!!!`][rlang::set_names][rlang::syms],
+`extract_edgelist` returns a `data.frame` edgelist from other tables extracted from HTML returns.
 }
 \author{
 Christopher Callaghan, \email{cjcallag@nps.edu}

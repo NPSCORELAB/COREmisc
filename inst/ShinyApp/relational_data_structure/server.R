@@ -1,149 +1,94 @@
-library(htmltools)
-library(shiny)
-library(rvest)
-
-shinyServer(function(input, output, session) {
-  #### Common Format Explorer ####
-  output$choice_ui <- renderUI({
-    if(input$format == "Instagram Returns"){
-      fluidRow(
-        fileInput("in_common", "Choose a file:", accept = c(".html"))
-      )
-    }
-    # if(input$format == "IP Dataframe"){
-    #   fluidRow(
-    #     fileInput("in_common", "Choose a file:", accept = c(".csv"))
-    #   )
-    # }
+server <- function(input, output) {
+  # Get reactive data ----
+  get_data <- eventReactive(input$go_button, {
+    # Validate both requirements:
+    validate(
+      need(
+        input$return_type != "",
+        message = "Select a type of return, then try again."
+        )
+    )
+    print(input$in_file$datapath)
+    # Get HTML data from input:
+    temp <- COREmisc:::get_html(file_path = input$in_file$datapath)
+    temp
   })
-  # Reactive download UI:
-  output$choice_download_ui <- renderUI({
-    if(input$format != ""){
-      fluidRow(
-        column(width = 12,
-               title = "Download",
-               collapsible = TRUE,
-               collapsed = TRUE,
-               column(4,
-                      HTML("<b>"),
-                      p("Instructions:"),
-                      HTML("</b>"),
-                      HTML("<small>"),
-                      p("First, provide a name for the edge list (e.g., if you are investigating John Doe, label it 'JohnDoe'). Note that the particle '_el' will be added to the download file. Then, download the file."),
-                      HTML("</small>")),
-               column(8,
-                      fluidRow(
-                        textInput("name_common", "Export identifier:", value="", placeholder = "Identifier without extension...")
-                      ),
-                      column(12, align= "center",
-                             fluidRow(
-                               downloadButton("download_common", label="Download Edgelist")
-                             )
-                      )
-               ))
-      )
+  # Generate table ----
+  output$table <- renderDataTable({
+    in_data <- get_data()
+    # print(class(in_data))
+    # Ensure that the unpacking is done by the right function:
+    if (input$return_type == "Direct Shares") {
+      out <- COREmisc::extract_shares(in_data)
     }
-  })
+    if (input$return_type == "Direct Stories") {
+      out <- COREmisc::extract_stories(in_data)
+    }
+    if (input$return_type == "Followship") {
+      out <- COREmisc::extract_followship(in_data)
+    }
 
-  # Get data:
-  get_common_data <- eventReactive(input$in_common, {
-    if(input$format == "Instagram Returns"){
-      gethtml <- reactive({
-        in_html <- input$in_common
-        out <- htmltools::HTML(in_html$datapath)
-      })
-      raw <- xml2::read_html(gethtml())
-      combo_raw_tables <- raw %>%
-        rvest::html_nodes("table") %>%
-        rvest::html_nodes("table") %>%
-        rvest::html_table(fill=TRUE) %>%
-        lapply(., dplyr::mutate_if, is.numeric, as.character) %>%
-        dplyr::bind_rows() %>%
-        rlang::set_names( c("var", "val"))
-      tagged_groups_df <- combo_raw_tables %>%
-        dplyr::mutate( group_id = if_else(var == "Id", row_number(), NA_integer_) ) %>%
-        #dplyr::mutate(group_id = dplyr::if_else(var == "id", dplyr::row_number(), NA_integer_) ) %>%
-        tidyr::fill(group_id)
-      tagged_groups_df %>%
-        dplyr::group_split(group_id) %>%
-        purrr::map(tidyr::spread, var, val) %>%
-        purrr::map_dfr(tidyr::gather, "sent_to_key", "sent_to_val", tidyselect::starts_with("Recipients") ) %>%
-        dplyr::mutate(sent_to_val = strsplit(sent_to_val, ")")) %>%
-        tidyr::unnest(sent_to_val) %>%
-        dplyr::mutate(sent_to_val = paste(sent_to_val, ")", sep="")) %>%
-        dplyr::distinct() -> clean_table
-      return(clean_table)
-    }
-    if(input$format == "IP Dataframe"){
-      getdf <- reactive({
-        indf_temp <- input$in_common
-        indf <- read.csv(indf_temp$datapath, header=TRUE)
-      })
-      out <- COREmisc::find_ip(getdf())
-      return(out)
-    }
-    else{}
+    out %>%
+      datatable(
+        rownames   = FALSE,
+        extensions = "Buttons",
+        options    = list(buttons = c("copy",
+                                      "csv",
+                                      "excel"),
+                          dom = "Bfrtip")
+                )
   })
-
-  # Reactive download edgelist:
-  output$download_common <- downloadHandler(
-    filename = function() {
-      paste(input$name_common, "_el.csv", sep="")
-    },
-    content = function(file){
-      if(input$format == "Instagram Returns"){
-        # Set up data table:
-        clean_html <- get_common_data()
-        clean_html %>%
-          dplyr::select(Author, sent_to_val, everything()) %>%
-          dplyr::rename(from=Author, to=sent_to_val) -> el_common_out
-      }
-      if(input$format == "FIP Dataframe"){
-        # Set up data table:
-        clean_df <- get_common_data()
-        clean_df %>%
-          dplyr::select(everything()) %>%
-          rename(from="Sender_Number", to="Target_Number") -> el_common_out
-      }
-      write.csv(el_common_out, file, row.names = FALSE)
-    }
-  )
-
-  # Reactive table render:
-  output$out_format <- renderDataTable({
-    if(input$format == "Instagram Returns"){
-      clean_html <- get_common_data()
-      clean_html %>%
-        dplyr::select(Author, sent_to_val, everything()) %>%
-        dplyr::rename(from=Author, to=sent_to_val) %>%
-        datatable(rownames=FALSE,
-                  options=list(
-                    scrollX = TRUE,
-                    pageLength = 5,
-                    #autoWidth=TRUE,
-                    lengthChange = TRUE,
-                    searching = FALSE,
-                    bInfo=FALSE,
-                    bPaginate=TRUE,
-                    bFilter=TRUE
-                  )) -> out_html
-      return(out_html)
-    }
-    if(input$format == "IP Dataframe"){
-      clean_df <- get_common_data()
-      clean_df %>%
-        datatable(rownames=FALSE,
-                  options=list(
-                    scrollX = TRUE,
-                    pageLength = 5,
-                    #autoWidth=TRUE,
-                    lengthChange = TRUE,
-                    searching = FALSE,
-                    bInfo=FALSE,
-                    bPaginate=TRUE,
-                    bFilter=TRUE
-                  )) -> out_df
-      return(out_df)
-    }
-  })
-})
+  # # Render download UI ----
+  # output$download_ui <- renderUI({
+  #   req(
+  #     input$return_type,
+  #     input$in_file,
+  #     input$go_button
+  #   )
+  #   fluidRow(
+  #     column(
+  #       width = 12,
+  #       title = "Download",
+  #       column(
+  #         width = 8,
+  #         fluidRow(
+  #           textInput(
+  #             inputId     = "name_input",
+  #             label       = "Export table:",
+  #             value       = "",
+  #             placeholder = "Identifier without extension..."
+  #           )
+  #         ),
+  #         column(
+  #           width = 12,
+  #           align = "center",
+  #           fluidRow(
+  #             downloadButton(
+  #               outputId = "download_order",
+  #               label    = "Download table."
+  #             )
+  #           )
+  #         )
+  #       )
+  #     )
+  #   )
+  # })
+  # # Reactive download ----
+  # output$download_order <- downloadHandler(
+  #   filename = function() {
+  #     paste(input$name_input, "_el.csv", sep="")
+  #   },
+  #   content = function(file) {
+  #     if (input$return_type == "Direct Shares") {
+  #       out <- COREmisc::extract_shares(in_data)
+  #     }
+  #     if (input$return_type == "Direct Stories") {
+  #       out <- COREmisc::extract_stories(in_data)
+  #     }
+  #     if (input$return_type == "Followship") {
+  #       out <- COREmisc::extract_followship(in_data)
+  #     }
+  #     write.csv(out, file, row.names = FALSE)
+  #   }
+  # )
+}
